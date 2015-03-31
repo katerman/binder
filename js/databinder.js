@@ -1,10 +1,10 @@
 /*
-* DataBinder.js - 0.1
+* binder.js - 0.2
 * Created By Kevin Reynolds <https://github.com/katerman>
 */
 
 "use strict";
-var dataBinder = function(md){
+var Binder = function(){
 
 	if(window.jQuery === undefined){
 		console.error('dataBinder.js requires jQuery');
@@ -13,108 +13,79 @@ var dataBinder = function(md){
 
 	var $this = this;
 
+	this.models = {};
+
+	this.elemsWithCurly = []; //during initial parse
+
+	//Array to store data-{class} values
+	this.elementClasses = [];
+
+	//Array to store data-{values} .. values
+	this.elementValues = [];
+
 	//debug switch
 	this.debug = function(bool){
 		return $this.debug = bool;
 	};
 
-	//default model data attribute
-	this.ModelDefault = md === undefined ? 'data-model' : md ;
-
-	//Object to hold dataModels
-	this.dataModels = {};
-
-	//Model callbacks
-	this.controllerCallbacks = {};
-
-	//hiding default 'data-'+this.hideDataAttr
-	this.hideDataAttr = 'hide';
-
-	//hold all hiding data attrs here so we dont need to loop through every update
-	this.hideObj = {};
-
-	//showing default 'data-'+this.showDataAttr
-	this.showDataAttr = 'show';
-
-	//hold all showing data attrs here so we dont need to loop through every update
-	this.showObj = {};
-
-	//t
-	this.clickDataAttr = 'click';
-
-	/*
-	* Method helps figure out what kind of data we should get from the
-	* element not all elements share the same data
-	*/
-	this.dataDecider = function(el){
-		var el = el[0];
-
-		if($(el).data($this.clickDataAttr) !== undefined){
-			return $(el).data($this.clickDataAttr);
-		}
-
-		if(el.value !== undefined){
-			return el.value;
-		}else if(el.innerText !== undefined){
-			return el.innerText;
-		}else{
-			return '';
-		}
+	//you can overwrite the dataAttr name
+	this.modelDataAttr = function(name){
+		return name || 'model';
 	}
 
-	/*
-	* Runs through each element matching any of our data attributes
-	* and add its to its matching Object
-	*/
-	this.dataParser = function(){
+	//you can overwrite the clickAttr name
+	this.clickDataAttr = function(name){
+		return name || 'click';
+	}
 
-		if($this.debug){console.log('---- Parsing Data ----');}
+	//you can overwrite the classAttr name
+	this.classDataAttr = function(name){
+		return name || 'class';
+	}
 
-		//setup each model
-		$.each($('['+$this.ModelDefault+']'), function(k,v){
+	//you can overwrite the hideAttr name
+	this.hideDataAttr = function(name){
+		return name || 'hide';
+	}
 
-			var t = $(this),
-				model_name = t.data($this.ModelDefault.split('data-')[1]);
+	//you can overwrite the showAttr name
+	this.showDataAttr = function(name){
+		return name || 'show';
+	}
 
-			if($this.debug){ console.log('---- dataModels['+model_name+'] = ' + $this.dataDecider(t)); }
+	//you can overwrite the valueAttr name
+	this.valueDataAttr = function(name){
+		return name || 'value';
+	}
 
-			$this.dataModels[model_name] = $this.dataDecider(t);
-		});
+	//Extend Functions for different sections
+	this.extendObj = { "init":[], "finish":[], "domUpdate":[] };
 
-		//setup each showdata
-		$.each($('[data-'+$this.showDataAttr+']'),function(k,v){
-			var _this = $(v),
-				spec_show_obj = $this.showObj[_this.data($this.showDataAttr).split(' ')[0]],
-				_this_class = 'data-'+$this.showDataAttr+'-'+k;
+	//Controllerss
+	this.controllers = {};
 
-			_this.addClass(_this_class);
+	//Method defining some helper functions
+	this.helpers = function(){
 
-			if(spec_show_obj === undefined){
-				$this.showObj[_this.data($this.showDataAttr).split(' ')[0]] = {};
-			}
-
-			$this.showObj[_this.data($this.showDataAttr).split(' ')[0]][_this_class] = _this.data($this.showDataAttr).split(' ');
-		});
-
-		//setup each hidedata
-		$.each($('[data-'+$this.hideDataAttr+']'),function(k,v){
-			var _this = $(v),
-				spec_hide_obj = $this.hideObj[_this.data($this.hideDataAttr).split(' ')[0]],
-				_this_class = 'data-'+$this.hideDataAttr+'-'+k;
-
-			_this.addClass(_this_class);
-
-			if(spec_hide_obj === undefined){
-				$this.hideObj[_this.data($this.hideDataAttr).split(' ')[0]] = {};
-			}
-
-			$this.hideObj[_this.data($this.hideDataAttr).split(' ')[0]][_this_class] = _this.data($this.hideDataAttr).split(' ');
-
-		});
+		if(Object.size === undefined){
+			Object.size = function(obj) {
+			    var size = 0, key;
+			    for (key in obj) {
+			        if (obj.hasOwnProperty(key)) size++;
+			    }
+			    return size;
+			};
+		}
 
 	};
 
-	this.valueComparisonSwitch = function(v1,operator,v2){
+	/* expressionEngine Method
+	* @desc expressionEngine method a basic comparison function that will compare two values with a comparison operator supplied.
+	* @param v1 '*' - First value to compare
+	* @param operator 'Valid comparison operator (==,===, !==, !=, <, >, etc) ' - How to compare v1 and v2
+	* @param v2 '*' - Second value to compare
+	*/
+	this.expressionEngine = function(v1,operator,v2){
 
 		if(operator !== undefined){
 			switch (operator) {
@@ -148,179 +119,516 @@ var dataBinder = function(md){
 
 	}
 
-	/*
-	* Works similarly to dataDecider() but for updating values
-	*/
-	this.upateModelValueCorrectly = function(el,val,_this){
 
-		var el = el === null ? null : el[0],
-			_this = _this[0];
+	this.prototype = {
 
-		//click
-		if($(_this).data($this.clickDataAttr) !== undefined){
-			var clickData = $(_this).data('model');
-			$this.dataModels[clickData] = val;
-		}
+		/* parseCurlys Method
+		* @desc parseCurlys function figure out where each double bracket model ( {{}} ) definer is. Sets the elements in an object 'table' for dynamic updating.
+		*/
+		parseCurlys: function(){
 
-		//hiding
-		var _this_hide_obj = $this.hideObj[$(_this).data('model')];
+			var elemsWithCurly = [];
+			var regex = new RegExp('(\{\{.*\}\})', 'gmi');
 
-		if($this.hideObj[$(_this).data('model')] !== undefined ){
+			if($this.debug == true){ console.log('Parsing curlies'); }
 
-			 $.each(_this_hide_obj,function(k,v){
+			//find EVERYTHING in the body
+			$.each( $('body *').not('script'), function(k,v){
 
-				var value1 = v[0],
-					comparison = v[1],
-					value2 = v[2];
+				var attrArray = [];
+				var html = $(v)
+				.clone()    //clone the element
+				.children() //select all the children
+				.remove()   //remove all the children
+				.end()  //again go back to selected element
+				.html();
 
-				if($this.valueComparisonSwitch($this.dataModels[value1],comparison,value2)){
-					$('.'+k).hide();
+				//if the element we're on contains some {{}} throw it in our 'elemswithcurly' array
+				if(html.match(regex)){
+
+					for(var i = 0, len = this.attributes.length; i < len; i++){
+						var curAttr = this.attributes[i],
+							type = curAttr['name'],
+							value = curAttr['value'];
+
+						if(value.match(regex)){
+							attrArray.push({"type": type, "value": value});
+						}
+					}
+
+					$this.elemsWithCurly.push({"elem":this, "orgHtml": $(this).html(), "orgAttrs": attrArray });
 				}
 
-			 });
+			});
 
-		}
+			//for each elem in elems with curly
+			$.each($this.elemsWithCurly, function(k,v){
+				var _this = v.elem,
+					innertext = $(_this).text();
 
-		//showing
-		var _this_show_obj = $this.showObj[$(_this).data('model')];
+				//grab our outer html to play with
+				var split = _this.outerHTML.split(regex);
 
-		if($this.showObj[$(_this).data('model')] !== undefined ){
+				//for every split peice from regex we have of this element
+				for(var i = 0, len = split.length; i < len; i++){
+					var current = split[i];
 
-			 $.each(_this_show_obj,function(k,v){
+					//if the current segement we're on contains a curly brace
+					if(current.match(regex)){
+						var splitcurrent = current.split(" ");
 
-				var value1 = v[0],
-					comparison = v[1],
-					value2 = v[2];
+						//go through the segment and get rid of the curlys to add to the model
+						for(var i2 = 0, len2 = splitcurrent.length; i2 < len2; i2++){
+							var current2 = splitcurrent[i2];
 
-				if($this.valueComparisonSwitch($this.dataModels[value1],comparison,value2)){
-					$('.'+k).show();
+							var restore = current2.match(regex);
+							current2 = restore ? restore.join('') : '';
+
+							current2 = current2.replace('{{', '');
+							current2 = current2.replace('}}','');
+
+							//if the model isnt set thats, fine put it in our modelss object
+							if($this.models[current2] === undefined){
+								$this.models[current2] = {};
+							}
+
+							//if we have our model set up check if we have elements as well if not set it up
+							if($this.models[current2]['elems'] === undefined){
+								$this.models[current2]['elems'] = [{ "elem": _this}];
+							}else{
+								$this.models[current2]['elems'].push( {"elem": _this} );
+							}
+
+							if($this.models[current2]['value'] === undefined){
+								$this.models[current2]['value'] = null;
+							}
+						}
+					}
+				}
+			});
+
+		},
+
+		/* replaceCurlysWithModel Method
+		* @desc replaceCurlysWithModel Replaces all curlys dynamicly with their models value
+		*/
+		replaceCurlysWithModel: function(){
+
+			if($this.debug == true){ console.log('%cReplacing curly markers with model values', 'color: green;'); }
+
+			var newVals = [];
+
+			//for each element with curly brace(s)
+			$.each($this.elemsWithCurly, function(k,v){
+
+				var elem = v.elem;
+				var html = v['orgHtml'];
+				var attr = v['orgAttrs'];
+
+				var keys = $.map($this.models, function(v, i){
+					return i;
+				});
+
+				//go through each model and check if its in currently looped through element
+				for(var i = 0, len = keys.length; i<len; i++){
+					var currentModel = keys[i];
+					//var currentObj = $this.models[currentModel];
+					var regex = new RegExp('\{\{'+keys[i]+'\}\}', 'gmi');
+					var value = $this.models[currentModel]['value'];
+
+					//if our model has a null value
+					if( value == undefined){
+
+						//if our current element's html contains our currently looped through model
+						if(html.match(regex) !== null){
+
+							if(newVals[k] === undefined){
+								newVals[k] = {"newHtml": html.replace(regex, ''), "attrs": [] } ;
+							}else{
+								newVals[k] = {"newHtml": newVals[k]['newHtml'].replace(regex, ''), "attrs": [] } ;
+							}
+
+						}else if(attr.length > 0 && newVals[k] == undefined){
+							newVals[k] = {};
+
+							if(newVals[k]['newHtml'] == undefined){
+								newVals[k]['newHtml'] = html;
+							}
+
+							if(newVals[k]['attrs'] == undefined){
+								newVals[k]['attrs'] = [];
+							}
+						}
+
+					}else{ //if our model has a non null value
+
+						//if our current element's html contains our currently looped through model
+						if(html.match(regex) !== null){
+
+							if(newVals[k] === undefined){
+								newVals[k] = {"newHtml": html.replace(regex, value), "attrs": [] } ;
+							}else{
+								if(newVals[k]['newHtml'] == undefined){console.log(newVals[k]); return false;}
+								newVals[k] = {"newHtml": newVals[k]['newHtml'].replace(regex, value), "attrs": [] } ;
+							}
+
+						}else if(attr.length > 0 && newVals[k] == undefined){
+							newVals[k] = {};
+
+							if(newVals[k]['newHtml'] == undefined){
+								newVals[k]['newHtml'] = html;
+							}
+
+							if(newVals[k]['attrs'] == undefined){
+								newVals[k]['attrs'] = [];
+							}
+						}
+					}
+
+					//if our element has attributes
+					if( attr.length > 0 ){
+
+						//loop through each attribute and add it to be replaced in our newVals obj
+						for(var i2 = 0, len2 = attr.length; i2 < len2; i2++){
+							var curAttr = attr[i2],
+								type = curAttr['type'],
+								attrvalue = curAttr['value'];
+
+							if( attrvalue.match(regex) ){
+								if(value == null){
+									newVals[k]['attrs'].push( {"model": currentModel, "attr": type,"text": attrvalue.replace(regex, '')} );
+								}else{
+									newVals[k]['attrs'].push( {"model": currentModel, "attr": type,"text": attrvalue.replace(regex, value)} );
+								}
+							}
+
+						}
+					}
+
 				}
 
-			 });
+				//overwrite the html
+				$(elem).html( newVals[k]['newHtml'] );
 
-		}
+				//overwrite the attrs
+				if(newVals[k]['attrs'].length > 0){
 
-		if($(_this).data($this.clickDataAttr) !== undefined){return;}
+					$.each(newVals[k]['attrs'], function(k,v){
+						var attr = v.attr,
+							text = v.text,
+							model = v.model;
 
-		//this first
-		if( (_this.type === 'checkbox' || _this.type === 'radio') && $(_this).data('model-force') !== true){
-			return;
-		} else if(_this.type === 'checkbox' && _this.checked === false){
-			$(el).text('');
-			$(el).val('');
-			return;
-		}
+						$(elem).attr(attr, text);
 
-		//then element
-		//updating the value
+					});
+				}
 
-		if(el === null){return;}
+			});
 
-		if(el.nodeName === 'SELECT'){
-			if( $(el).children('[value="'+val+'"]').length > 0 ){
-				$(el).val(val);
-				return;
+			//Data specific function firing
+			$this.prototype.valueElemEvent();
+			$this.prototype.classElemEvent();
+			$this.prototype.hideElemEvent();
+			$this.prototype.showElemEvent();
+
+		},
+
+		//data-hide - hiding an element
+		hideElemEvent: function(){
+
+			//Hide element with hideDataAttr()
+			$.each($('[data-'+$this.hideDataAttr()+']'),function(k,elem){
+
+				var segs = $(elem).data( $this.hideDataAttr() ).split(" ");
+
+				if(segs !== undefined && segs.length === 3){
+					var model = segs[0];
+					var compare = segs[1];
+					var value = segs[2];
+
+					if($this.models[model] !== undefined && $this.expressionEngine($this.models[model]['value'],compare,value)){
+						$(elem).hide();
+					}
+				}else{
+					console.error('data-' + $this.hideDataAttr() + ' only accepts 3 segments as an expression - {model} !== 1 ');
+				}
+
+			});
+
+		},
+
+		//data-show - showing an element
+		showElemEvent: function(){
+
+			//Show element with showDataAttr()
+			$.each($('[data-'+$this.showDataAttr()+']'),function(k,elem){
+
+				var segs = $(elem).data( $this.showDataAttr() ).split(" ");
+
+				if(segs !== undefined && segs.length === 3){
+					var model = segs[0];
+					var compare = segs[1];
+					var value = segs[2];
+
+					if($this.models[model] !== undefined && $this.expressionEngine($this.models[model]['value'],compare,value)){
+						$(elem).show();
+					}
+				}else{
+					console.error('data-' + $this.showDataAttr() + ' only accepts 3 segments as an expression - {model} !== 1 ');
+				}
+
+			});
+
+		},
+
+		//data-value - value setting
+		valueElemEvent: function(){
+			$.each($('[data-'+$this.valueDataAttr()+']'),function(k,elem){
+
+				if($this.elementValues[k] === undefined){
+					$this.elementValues.push( { model: $(elem).data($this.valueDataAttr()) } );
+				}
+
+				var val =  $this.models[$this.elementValues[k]['model']];
+
+				//if value is not undefined
+				if( val != undefined){
+
+					//specifically target selects
+					if(elem.tagName === 'SELECT'){
+
+						//if we have any children with our value
+						if( $(elem).children('[value="'+val['value']+'"]').length > 0){
+							$(elem).val( val['value'] ); //update the val
+						}
+
+					}else{
+						$(elem).val( val['value'] );
+					}
+				}
+
+			});
+		},
+
+		//Data-class - class setting
+		classElemEvent: function(){
+
+			//classAttr Adding/updating class(s) through the data-{class}
+			$.each($('[data-'+$this.classDataAttr()+']'),function(k,elem){
+
+				var finalClassStr = '';
+
+				if($this.elementClasses[k] === undefined){
+					$this.elementClasses.push( $(elem).attr('class') );
+				}
+
+				if($(elem).data( $this.classDataAttr() )){
+
+					$(elem).attr('class', '');
+
+					var finalClasses = {};
+
+					var classes = $(elem).data( $this.classDataAttr() ).split(" ");
+
+					$.each($this.elementClasses[k].split(" "),function(k,value){
+						if(finalClasses[value] === undefined){
+							finalClasses[value] = value;
+						}
+					});
+
+					$.each(classes, function(k,value){
+						if($this.models[value].value !== null && finalClasses[value] === undefined){
+							finalClasses[value] = $this.models[value].value;
+						}
+					});
+
+					$.each(finalClasses, function(k,v){
+						finalClassStr += v + ' ';
+					});
+
+					$(elem).attr('class', finalClassStr);
+
+				}
+			});
+		},
+
+		/* domEvents Method
+		* @desc domEvent method binds events to specific elements with binder specific Attributes (data-model, data-click, etc..)
+		* @param name 'String' - Name of the model this controller
+		* @param callback 'Function' - function to fire on model update. Function passed in has 2 arguments to use (element, modelValue).
+		*/
+		domEvents: function(){
+
+			//input on keyup with modelAttr
+			$('[data-'+$this.modelDataAttr()+']').unbind('keyup change').bind('keyup change', function(){
+				var model = $(this).data( $this.modelDataAttr() );
+
+				$this.model( model, $(this).val() );
+
+				$this.controllerCall($(this),model);
+			});
+
+			//elements with clickAttr
+			$('[data-'+$this.clickDataAttr()+']').unbind('click').bind('click',function(){
+
+				var segs = $(this).data($this.clickDataAttr()).split(" ");
+
+				if(segs.length === 3){
+					var model = segs[0];
+					//var compare = segs[1];
+					var value = segs[2];
+					$this.model( model, value );
+				}else{
+					console.error('data-'+$this.clickDataAttr() + ' require 3 parts to its expression - {model} = {value}');
+				}
+
+				$this.controllerCall($(this), model);
+
+			});
+
+			//defining custom domupdate events
+			if( Object.size($this.extendObj['domUpdate']) > 0){
+				$.each($this.extendObj['domUpdate'], function(k,v){
+					v();
+				});
 			}
 
-			return;
-		}else if(el.type === 'checkbox' || el.type === 'radio'){
-			if($(el).val() === val){
-				el.checked = true;
-			}else{
-				el.checked = false;
-			}
-			return;
 		}
-
-		$(el).text(val);
-		$(el).val(val);
-		return;
 
 	}
 
-	/*
-	* Controller Method creates callbacks on specific dataModel updates
+	/* controller Method
+	* @desc Controller Method creates callbacks on specific dataModel updates
+	* @param name 'String' - Name of the model this controller
+	* @param callback 'Function' - function to fire on model update. Function passed in has 2 arguments to use (element, modelValue).
 	*/
 	this.controller = function(name, callback){
-		if($this.dataModels[name] === undefined){
-			return console.error('model: '+ name +' is not defined cannot set up controller');
+		if($this.models[name] === undefined){
+			$this.model(name, '');
 		}
 
-		$this.controllerCallbacks[name] = callback;
+		$this.controllers[name] = callback;
 
 		if($this.debug){console.log('%cDefined model callback for ' + name, "color: orange" );}
 
 	}
 
-	/*
-	* Whenever one of our models changes we update it using this method
+	/* controllerCall Method
+	* @desc Calls a specific controllers function
+	* @param element 'DOM Element' - On dom event firing. This method will fire on the updating element.
+	* @param model 'String' - Optional model, controllerCall will take the element passed in and check its data-model, however you can force a model by passing in this 2nd argument
 	*/
-	this.ModelsUpdate = function(){
+	this.controllerCall  = function(element,model){
 
-		function update(t,k,v,e){
+		if(model !== undefined){
+			var dataModel = model; //we know what our model is because we passed it in!
+		}else{
+			var dataModel = $(element).data( $this.modelDataAttr()); //pull the model from data-model
+		}
 
-				var t = $(t),
-					data = $this.dataDecider(t);
+		if( $this.controllers[ dataModel ] !== undefined ){
+			$this.controllers[ dataModel ](element, $this.models[dataModel]);
+			if($this.debug){console.log('%c-model callback fired for: ' + dataModel, "color: brown;" );}
+			return true;
+		}
+		return false;
+	}
 
-				$this.dataModels[k] = data;
+	/* model Method
+	* @desc If the passed in model does not exist it will create the model with passed in value. If it does exist it will just update the models value.
+	* @param mod 'String|Object' - Model name, or Object of model names with its value
+	* @param val 'String' - Value of the passed in model (only if you passed in a singular model)
+	*/
+	this.model = function(mod,val){
 
-				if($this.debug){console.log('%cUpdating dataModel ' + k + ' = '+ data, "color: #78B4F9" );}
+		if(typeof mod === 'object'){
 
-				$this.upateModelValueCorrectly( $('['+$this.ModelDefault+'='+k+']').not($(t)), data, $(t) );
+			$.each(mod, function(k,v){
+				var mod = k,
+					val = v;
 
-				if($this.controllerCallbacks[k] !== undefined){
-					$this.controllerCallbacks[k](t,data);
-					if($this.debug){console.log('%c-model callback fired for ' + k, "color: green" );}
+				if($this.models[mod] === undefined){
+					$this.models[mod] = {};
+					if($this.debug == true){ console.log('Adding model: ' + mod + ' to Value: ' + val ); }
+				}else{
+					if($this.debug == true){ console.log('Updated model: ' + mod + ' to Value: ' + val ); }
 				}
 
-				e.stopPropagation();
+				$this.models[mod]['value'] = val;
+
+			});
+
+		}else{
+
+			if($this.models[mod] === undefined){
+				$this.models[mod] = {};
+				if($this.debug == true){ console.log('Adding model: ' + mod + ' to Value: ' + val ); }
+			}else{
+				if($this.debug == true){ console.log('Updated model: ' + mod + ' to Value: ' + val ); }
+			}
+
+			$this.models[mod]['value'] = val;
 
 		}
 
-		//setup onClick
-		$.each($('[data-'+$this.clickDataAttr+']'),function(k,v){
+		$this.prototype.replaceCurlysWithModel();
 
-			if($this.debug){console.log('-Binding click events');}
+		return true;
+	}
 
-			$(v).on('click', function(e){
-				var _this = $(v),
-					_thisModel = _this.data('model');
-				if($this.debug){console.log('click update: ' + _this.data($this.clickDataAttr) +' bound to ' + _thisModel )}
-
-				update(_this,_thisModel,v,e);
-
-			});
-		});
-
-		$.each($this.dataModels,function(k,v){
-
-
-			$('['+$this.ModelDefault+'='+k+']').bind('keyup change', function(e){
-
-				update($(this),k,v,e);
-
-			});
-
-
-		});
-
-	};
-
-	/*
-	* Start the engines
+	/* extend Method
+	* @desc This method passes functions into specific starting points (init, domUpdate, finish)
+	* @param mod 'String|Object' - Model name, or Object of model names with its value
+	* @param val 'String' - Value of the passed in model (only if you passed in a singular model)
 	*/
+	this.extend = function(when,funct){
+
+		if( $this.extendObj[when] === undefined ){
+			console.error('You cant use a firing position of ' + when + ' the only options are init, finish, and domUpdate');
+		}else if(typeof funct !== 'function'){
+			console.error('Extends second option needs to be a function');
+		}else{
+			$this.extendObj[when].push(funct);
+		}
+
+	}
+
+	//Init
 	this.init = function(){
 
-		if($this.debug){console.log("%c:Binder Debug Activated:", "color: #1b75bc;");}
-		if($this.debug){console.time(":Binder Setup Time:");}
+		if($this.debug){ console.log('%c:BINDER INIT:', 'color: #1b75bc; border-bottom: 1px solid #6677ff;'); }
+		if($this.debug){ console.time(":Binder Setup Time:"); }
 
-		$this.dataParser();
-		$this.ModelsUpdate();
+		this.helpers();
+
+		//defining custom init events
+		if( Object.size($this.extendObj['init']) > 0){
+			$.each($this.extendObj['init'], function(k,v){
+				v($this);
+			});
+		}
+
+		var prototype = $this.prototype;
+
+		prototype.parseCurlys();
+
+		prototype.replaceCurlysWithModel();
+
+		prototype.domEvents();
 
 		if($this.debug){console.timeEnd(":Binder Setup Time:");}
 
-	};
+		if($this.debug){console.log(this);}
+
+			//defining custom finish events
+		if( Object.size($this.extendObj['finish']) > 0){
+			$.each($this.extendObj['finish'], function(k,v){
+				v($this);
+			});
+		}
+
+	}
 
 
-};
+}
 
