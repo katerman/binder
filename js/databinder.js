@@ -1,5 +1,5 @@
 /*
-* binder.js - 0.2
+* binder.js - 0.21 (BIGFOOT)
 * Created By Kevin Reynolds <https://github.com/katerman>
 */
 
@@ -59,7 +59,9 @@ var Binder = function(){
 	}
 
 	//Extend Functions for different sections
-	this.extendObj = { "init":[], "finish":[], "domUpdate":[] };
+	this.basicExtendObj = { "init":[], "finish":[], "domUpdate":[] };
+
+	this.customExtendObj = {};
 
 	//Controllerss
 	this.controllers = {};
@@ -77,7 +79,7 @@ var Binder = function(){
 			};
 		}
 
-	};
+	}();
 
 	/* expressionEngine Method
 	* @desc expressionEngine method a basic comparison function that will compare two values with a comparison operator supplied.
@@ -330,6 +332,33 @@ var Binder = function(){
 			$this.prototype.classElemEvent();
 			$this.prototype.hideElemEvent();
 			$this.prototype.showElemEvent();
+			$this.prototype.customExtend();
+
+		},
+
+		customExtend: function(){
+
+			//defining custom domupdate events
+			if( Object.size($this.customExtendObj) > 0){
+				$.each($this.customExtendObj, function(k,v){
+
+					var dataAttr = k.toLowerCase();
+					var model = v.model;
+					var eventType = v.eventType;
+					var callback = v.callback;
+
+					$.each( $('[data-'+dataAttr+']'), function(key,element){
+
+						$(element).unbind(eventType).bind(eventType,function(){
+							callback( {"element": $(element), "dataAttrVal":$(element).data(dataAttr), "model": $this.models[model]} );
+							$this.prototype.customExtend();
+						});
+
+					});
+
+				});
+
+			}
 
 		},
 
@@ -487,9 +516,9 @@ var Binder = function(){
 			});
 
 			//defining custom domupdate events
-			if( Object.size($this.extendObj['domUpdate']) > 0){
-				$.each($this.extendObj['domUpdate'], function(k,v){
-					v();
+			if( Object.size($this.basicExtendObj['domUpdate']) > 0){
+				$.each($this.basicExtendObj['domUpdate'], function(k,v){
+					v.call();
 				});
 			}
 
@@ -583,12 +612,29 @@ var Binder = function(){
 	*/
 	this.extend = function(when,funct){
 
-		if( $this.extendObj[when] === undefined ){
-			console.error('You cant use a firing position of ' + when + ' the only options are init, finish, and domUpdate');
-		}else if(typeof funct !== 'function'){
-			console.error('Extends second option needs to be a function');
-		}else{
-			$this.extendObj[when].push(funct);
+		if(typeof when === 'object'){ //if more customly defined extend
+
+			var model = when.model === undefined ?  '' : when.model ; // model we have
+			var data = when.data === undefined ? null : when.data ; //data to fire on
+			var callback = when.data === undefined ? null : when.callback ; //callback
+			var eventType = when.eventType === undefined ? 'click' : when.eventType ; //callback
+
+			if(data == null){
+				return error.log('data key is requried for the extend method.');
+			}else if(callback == null){
+				return error.log('callback key is requried for the extend method.');
+			}
+
+			return $this.customExtendObj[data] = {"model": model, "callback": callback, "eventType": eventType};
+
+		}else{ //if regular extend such as 'init, domupdate or finish'
+			if( $this.basicExtendObj[when] === undefined ){
+				return console.error('You cant use a firing position of ' + when + ' the only options are init, finish, and domUpdate');
+			}else if(typeof funct !== 'function'){
+				return console.error('Extends second option needs to be a function');
+			}else{
+				return $this.basicExtendObj[when].push(funct);
+			}
 		}
 
 	}
@@ -599,12 +645,10 @@ var Binder = function(){
 		if($this.debug){ console.log('%c:BINDER INIT:', 'color: #1b75bc; border-bottom: 1px solid #6677ff;'); }
 		if($this.debug){ console.time(":Binder Setup Time:"); }
 
-		this.helpers();
-
 		//defining custom init events
-		if( Object.size($this.extendObj['init']) > 0){
-			$.each($this.extendObj['init'], function(k,v){
-				v($this);
+		if( Object.size($this.basicExtendObj['init']) > 0){
+			$.each($this.basicExtendObj['init'], function(k,v){
+				v.call($this);
 			});
 		}
 
@@ -621,9 +665,9 @@ var Binder = function(){
 		if($this.debug){console.log(this);}
 
 			//defining custom finish events
-		if( Object.size($this.extendObj['finish']) > 0){
-			$.each($this.extendObj['finish'], function(k,v){
-				v($this);
+		if( Object.size($this.basicExtendObj['finish']) > 0){
+			$.each($this.basicExtendObj['finish'], function(k,v){
+				v.call($this);
 			});
 		}
 

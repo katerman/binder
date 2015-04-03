@@ -1,0 +1,79 @@
+html, body {
+	min-height: 100%;
+	height: 100%;
+}
+
+body {
+	font-family: 'Lato', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+	background-image:  url('../img/bg.png');
+	background-repeat: repeat;
+}
+
+body:after {
+	content: '';
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	z-index: -1;
+	background: -moz-linear-gradient(top,  rgba(95,69,188,0.6) 0%, rgba(0,0,0,0) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(95,69,188,0.6)), color-stop(100%,rgba(0,0,0,0))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  rgba(95,69,188,0.6) 0%,rgba(0,0,0,0) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  rgba(95,69,188,0.6) 0%,rgba(0,0,0,0) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  rgba(95,69,188,0.6) 0%,rgba(0,0,0,0) 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  rgba(95,69,188,0.6) 0%,rgba(0,0,0,0) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#995f45bc', endColorstr='#00000000',GradientType=0 ); /* IE6-9 */
+}
+
+.main-content {
+	background: rgba(255,255,255,0.5);
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	padding-bottom: 10px;
+	margin-bottom: 20px;
+}
+
+.navbar {
+	margin-top: 10px;
+	background: rgba(255,255,255,0.5);
+}
+
+.navbar li.active a {
+	background: none !important;
+}
+
+.hiddenelem {
+	display: none;
+}
+
+.show-code,.hide-code {
+	cursor: pointer;
+	margin: 10px 0;
+}
+
+.test-span {
+	min-width: 100px;
+	max-width: 100px;
+	border-bottom: 1px solid #000;
+	display: inline-block;
+	overflow-x: hidden;
+}
+
+.code-row {
+	border-top: 1px solid rgba(0,0,0,0.5);
+	margin-top: 11px;
+}
+
+.container .main-content .jumbotron {
+	border-radius:10px 10px 0px 0px;
+	-webkit-border-radius:10px 10px 0px 0px;
+	margin-bottom: 0;
+	background: url('../img/binderBG.jpg');
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.container .jumbotron h1 {
+	text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+	color: #fff;
+}
