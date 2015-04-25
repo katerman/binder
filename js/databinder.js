@@ -1,5 +1,5 @@
 /*
-* binder.js - 0.21 (BIGFOOT)
+* binder.js - 0.22 (HIPPOGRIFF)
 * Created By Kevin Reynolds <https://github.com/katerman>
 */
 
@@ -23,44 +23,29 @@ var Binder = function(){
 	//Array to store data-{values} .. values
 	this.elementValues = [];
 
-	//debug switch
-	this.debug = function(bool){
-		return $this.debug = bool;
-	};
-
-	//you can overwrite the dataAttr name
-	this.modelDataAttr = function(name){
-		return name || 'model';
+	//Property Defaults
+	$this.properties = {
+		"debug": "false",
+		"modelDataAttr": "model",
+		"clickDataAttr": "click",
+		"classDataAttr": "class",
+		"hideDataAttr": "hide",
+		"showDataAttr": "show",
+		"valueDataAttr": "value",
+		"leftDelimiter": "{{",
+		"rightDelimiter": "}}"
 	}
 
-	//you can overwrite the clickAttr name
-	this.clickDataAttr = function(name){
-		return name || 'click';
+	this.properties.set = function(prop, val){
+		$this.properties[prop] = val;
 	}
 
-	//you can overwrite the classAttr name
-	this.classDataAttr = function(name){
-		return name || 'class';
-	}
-
-	//you can overwrite the hideAttr name
-	this.hideDataAttr = function(name){
-		return name || 'hide';
-	}
-
-	//you can overwrite the showAttr name
-	this.showDataAttr = function(name){
-		return name || 'show';
-	}
-
-	//you can overwrite the valueAttr name
-	this.valueDataAttr = function(name){
-		return name || 'value';
+	this.properties.get = function(prop){
+		return $this.properties[prop];
 	}
 
 	//Extend Functions for different sections
 	this.basicExtendObj = { "init":[], "finish":[], "domUpdate":[] };
-
 	this.customExtendObj = {};
 
 	//Controllerss
@@ -125,14 +110,14 @@ var Binder = function(){
 	this.prototype = {
 
 		/* parseCurlys Method
-		* @desc parseCurlys function figure out where each double bracket model ( {{}} ) definer is. Sets the elements in an object 'table' for dynamic updating.
+		* @desc parseCurlys function figure out where each model is by delmiter ( default is {{}} ). Sets the elements in an object 'table' for dynamic updating.
 		*/
 		parseCurlys: function(){
 
 			var elemsWithCurly = [];
-			var regex = new RegExp('(\{\{.*\}\})', 'gmi');
+			var regex = new RegExp('('+$this.properties.get('leftDelimiter')+'.*'+$this.properties.get('rightDelimiter')+')', 'gmi');
 
-			if($this.debug == true){ console.log('Parsing curlies'); }
+			if($this.properties.get('debug') == true){ console.log('Parsing curlies/Delims'); }
 
 			//find EVERYTHING in the body
 			$.each( $('body *').not('script'), function(k,v){
@@ -211,12 +196,12 @@ var Binder = function(){
 
 		},
 
-		/* replaceCurlysWithModel Method
-		* @desc replaceCurlysWithModel Replaces all curlys dynamicly with their models value
+		/* replaceDelimWithModel Method
+		* @desc replaceDelimWithModel Replaces all curlys dynamicly with their models value
 		*/
-		replaceCurlysWithModel: function(){
+		replaceDelimWithModel: function(){
 
-			if($this.debug == true){ console.log('%cReplacing curly markers with model values', 'color: green;'); }
+			if($this.properties.get('debug') == true){ console.log('%cReplacing curly markers with model values', 'color: green;'); }
 
 			var newVals = [];
 
@@ -235,7 +220,7 @@ var Binder = function(){
 				for(var i = 0, len = keys.length; i<len; i++){
 					var currentModel = keys[i];
 					//var currentObj = $this.models[currentModel];
-					var regex = new RegExp('\{\{'+keys[i]+'\}\}', 'gmi');
+					var regex = new RegExp('('+$this.properties.get('leftDelimiter')+keys[i]+$this.properties.get('rightDelimiter')+')', 'gmi');
 					var value = $this.models[currentModel]['value'];
 
 					//if our model has a null value
@@ -366,9 +351,9 @@ var Binder = function(){
 		hideElemEvent: function(){
 
 			//Hide element with hideDataAttr()
-			$.each($('[data-'+$this.hideDataAttr()+']'),function(k,elem){
+			$.each($('[data-'+$this.properties.get('hideDataAttr')+']'),function(k,elem){
 
-				var segs = $(elem).data( $this.hideDataAttr() ).split(" ");
+				var segs = $(elem).data( $this.properties.get('hideDataAttr') ).split(" ");
 
 				if(segs !== undefined && segs.length === 3){
 					var model = segs[0];
@@ -379,7 +364,7 @@ var Binder = function(){
 						$(elem).hide();
 					}
 				}else{
-					console.error('data-' + $this.hideDataAttr() + ' only accepts 3 segments as an expression - {model} !== 1 ');
+					console.error('data-' + $this.properties.get('hideDataAttr') + ' only accepts 3 segments as an expression - {model} !== 1 ');
 				}
 
 			});
@@ -390,9 +375,9 @@ var Binder = function(){
 		showElemEvent: function(){
 
 			//Show element with showDataAttr()
-			$.each($('[data-'+$this.showDataAttr()+']'),function(k,elem){
+			$.each($('[data-'+$this.properties.get('showDataAttr')+']'),function(k,elem){
 
-				var segs = $(elem).data( $this.showDataAttr() ).split(" ");
+				var segs = $(elem).data( $this.properties.get('showDataAttr') ).split(" ");
 
 				if(segs !== undefined && segs.length === 3){
 					var model = segs[0];
@@ -403,7 +388,7 @@ var Binder = function(){
 						$(elem).show();
 					}
 				}else{
-					console.error('data-' + $this.showDataAttr() + ' only accepts 3 segments as an expression - {model} !== 1 ');
+					console.error('data-' + $this.properties.get('showDataAttr') + ' only accepts 3 segments as an expression - {model} !== 1 ');
 				}
 
 			});
@@ -412,10 +397,10 @@ var Binder = function(){
 
 		//data-value - value setting
 		valueElemEvent: function(){
-			$.each($('[data-'+$this.valueDataAttr()+']'),function(k,elem){
+			$.each($('[data-'+$this.properties.get('valueDataAttr')+']'),function(k,elem){
 
 				if($this.elementValues[k] === undefined){
-					$this.elementValues.push( { model: $(elem).data($this.valueDataAttr()) } );
+					$this.elementValues.push( { model: $(elem).data($this.properties.get('valueDataAttr')) } );
 				}
 
 				var val =  $this.models[$this.elementValues[k]['model']];
@@ -443,7 +428,7 @@ var Binder = function(){
 		classElemEvent: function(){
 
 			//classAttr Adding/updating class(s) through the data-{class}
-			$.each($('[data-'+$this.classDataAttr()+']'),function(k,elem){
+			$.each($('[data-'+$this.properties.get('classDataAttr')+']'),function(k,elem){
 
 				var finalClassStr = '';
 
@@ -451,13 +436,13 @@ var Binder = function(){
 					$this.elementClasses.push( $(elem).attr('class') );
 				}
 
-				if($(elem).data( $this.classDataAttr() )){
+				if($(elem).data( $this.properties.get('classDataAttr') )){
 
 					$(elem).attr('class', '');
 
 					var finalClasses = {};
 
-					var classes = $(elem).data( $this.classDataAttr() ).split(" ");
+					var classes = $(elem).data( $this.properties.get('classDataAttr') ).split(" ");
 
 					$.each($this.elementClasses[k].split(" "),function(k,value){
 						if(finalClasses[value] === undefined){
@@ -489,18 +474,18 @@ var Binder = function(){
 		domEvents: function(){
 
 			//input on keyup with modelAttr
-			$('[data-'+$this.modelDataAttr()+']').unbind('keyup change').bind('keyup change', function(){
-				var model = $(this).data( $this.modelDataAttr() );
+			$('[data-'+$this.properties.get('modelDataAttr')+']').unbind('keyup change').bind('keyup change', function(){
+				var model = $(this).data( $this.properties.get('modelDataAttr') );
 
 				$this.model( model, $(this).val() );
 
-				$this.controllerCall($(this),model);
+				$this.controller.call($(this),model);
 			});
 
 			//elements with clickAttr
-			$('[data-'+$this.clickDataAttr()+']').unbind('click').bind('click',function(){
+			$('[data-'+$this.properties.get('clickDataAttr')+']').unbind('click').bind('click',function(){
 
-				var segs = $(this).data($this.clickDataAttr()).split(" ");
+				var segs = $(this).data($this.properties.get('clickDataAttr')).split(" ");
 
 				if(segs.length === 3){
 					var model = segs[0];
@@ -508,10 +493,10 @@ var Binder = function(){
 					var value = segs[2];
 					$this.model( model, value );
 				}else{
-					console.error('data-'+$this.clickDataAttr() + ' require 3 parts to its expression - {model} = {value}');
+					console.error('data-'+$this.properties.get('clickDataAttr') + ' require 3 parts to its expression - {model} = {value}');
 				}
 
-				$this.controllerCall($(this), model);
+				$this.controller.call($(this), model);
 
 			});
 
@@ -538,26 +523,26 @@ var Binder = function(){
 
 		$this.controllers[name] = callback;
 
-		if($this.debug){console.log('%cDefined model callback for ' + name, "color: orange" );}
+		if($this.properties.get('debug')){console.log('%cDefined model callback for ' + name, "color: orange" );}
 
 	}
 
-	/* controllerCall Method
+	/* controller.call Method
 	* @desc Calls a specific controllers function
 	* @param element 'DOM Element' - On dom event firing. This method will fire on the updating element.
-	* @param model 'String' - Optional model, controllerCall will take the element passed in and check its data-model, however you can force a model by passing in this 2nd argument
+	* @param model 'String' - Optional model, controller.call will take the element passed in and check its data-model, however you can force a model by passing in this 2nd argument
 	*/
-	this.controllerCall  = function(element,model){
+	this.controller.call  = function(element,model){
 
 		if(model !== undefined){
 			var dataModel = model; //we know what our model is because we passed it in!
 		}else{
-			var dataModel = $(element).data( $this.modelDataAttr()); //pull the model from data-model
+			var dataModel = $(element).data( $this.properties.get('modelDataAttr')); //pull the model from data-model
 		}
 
 		if( $this.controllers[ dataModel ] !== undefined ){
 			$this.controllers[ dataModel ](element, $this.models[dataModel]);
-			if($this.debug){console.log('%c-model callback fired for: ' + dataModel, "color: brown;" );}
+			if($this.properties.get('debug')){console.log('%c-model callback fired for: ' + dataModel, "color: brown;" );}
 			return true;
 		}
 		return false;
@@ -578,9 +563,9 @@ var Binder = function(){
 
 				if($this.models[mod] === undefined){
 					$this.models[mod] = {};
-					if($this.debug == true){ console.log('Adding model: ' + mod + ' to Value: ' + val ); }
+					if($this.properties.get('debug') == true){ console.log('Adding model: ' + mod + ' to Value: ' + val ); }
 				}else{
-					if($this.debug == true){ console.log('Updated model: ' + mod + ' to Value: ' + val ); }
+					if($this.properties.get('debug') == true){ console.log('Updated model: ' + mod + ' to Value: ' + val ); }
 				}
 
 				$this.models[mod]['value'] = val;
@@ -591,16 +576,16 @@ var Binder = function(){
 
 			if($this.models[mod] === undefined){
 				$this.models[mod] = {};
-				if($this.debug == true){ console.log('Adding model: ' + mod + ' to Value: ' + val ); }
+				if($this.properties.get('debug') == true){ console.log('Adding model: ' + mod + ' to Value: ' + val ); }
 			}else{
-				if($this.debug == true){ console.log('Updated model: ' + mod + ' to Value: ' + val ); }
+				if($this.properties.get('debug') == true){ console.log('Updated model: ' + mod + ' to Value: ' + val ); }
 			}
 
 			$this.models[mod]['value'] = val;
 
 		}
 
-		$this.prototype.replaceCurlysWithModel();
+		$this.prototype.replaceDelimWithModel();
 
 		return true;
 	}
@@ -642,8 +627,8 @@ var Binder = function(){
 	//Init
 	this.init = function(){
 
-		if($this.debug){ console.log('%c:BINDER INIT:', 'color: #1b75bc; border-bottom: 1px solid #6677ff;'); }
-		if($this.debug){ console.time(":Binder Setup Time:"); }
+		if($this.properties.get('debug')){ console.log('%c:BINDER INIT:', 'color: #1b75bc; border-bottom: 1px solid #6677ff;'); }
+		if($this.properties.get('debug')){ console.time(":Binder Setup Time:"); }
 
 		//defining custom init events
 		if( Object.size($this.basicExtendObj['init']) > 0){
@@ -656,13 +641,13 @@ var Binder = function(){
 
 		prototype.parseCurlys();
 
-		prototype.replaceCurlysWithModel();
+		prototype.replaceDelimWithModel();
 
 		prototype.domEvents();
 
-		if($this.debug){console.timeEnd(":Binder Setup Time:");}
+		if($this.properties.get('debug')){console.timeEnd(":Binder Setup Time:");}
 
-		if($this.debug){console.log(this);}
+		if($this.properties.get('debug')){console.log(this);}
 
 			//defining custom finish events
 		if( Object.size($this.basicExtendObj['finish']) > 0){
