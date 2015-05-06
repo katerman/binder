@@ -1,0 +1,54 @@
+<h3>Using a controller for more realistic actions</h3>
+<p>With using of the 2 way data binding to update the tabs state. We can check on update to see which of our contents to display below.</p>
+<p>The controller will add active to the element that triggered the model update, and add a class of active; while removing active from its siblings.</p>
+
+<ul class="nav nav-tabs">
+	<li role="presentation" class="active" data-click="test-tab-state = 1"><a href="#doc">Home</a></li>
+	<li role="presentation" data-click="test-tab-state = 2"><a href="#docs">Profile</a></li>
+	<li role="presentation" data-click="test-tab-state = 3"><a href="#docs">Contact</a></li>
+</ul>
+
+<div data-show="test-tab-state === 1" data-hide="test-tab-state !== 1">
+	Welcome to the home page
+</div>
+
+<div class="hiddenelem" data-show="test-tab-state === 2" data-hide="test-tab-state !== 2">
+	Welcome to the about page
+</div>
+
+<div class="hiddenelem" data-show="test-tab-state === 3" data-hide="test-tab-state !== 3">
+	Welcome to the contact page
+</div>
+
+<div>
+	<button class="btn show-code" data-click="code3 = 1" data-hide="code3 === 1" data-show="code3 === 2">Show Code</button>
+	<button class="btn hide-code hiddenelem" data-click="code3 = 2" data-show="code3 === 1" data-hide="code3 !== 1">Hide Code</button>
+</div>
+
+<pre data-show="code3 === 1" data-hide="code3 === 2" class="hiddenelem">
+HTML:
+&lt;ul class=&quot;nav nav-tabs&quot;&gt;
+&lt;li role=&quot;presentation&quot; class=&quot;active&quot; data-click=&quot;test-tab-state = 1&quot;&gt;&lt;a href=&quot;#doc&quot;&gt;Home&lt;/a&gt;&lt;/li&gt;
+&lt;li role=&quot;presentation&quot; data-click=&quot;test-tab-state = 2&quot;&gt;&lt;a href=&quot;#docs&quot;&gt;Profile&lt;/a&gt;&lt;/li&gt;
+&lt;li role=&quot;presentation&quot; data-click=&quot;test-tab-state = 3&quot;&gt;&lt;a href=&quot;#docs&quot;&gt;Contact&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div data-show=&quot;test-tab-state === 1&quot; data-hide=&quot;test-tab-state !== 1&quot;&gt;
+Welcome to the home page
+&lt;/div&gt;
+
+&lt;div class=&quot;hiddenelem&quot; data-show=&quot;test-tab-state === 2&quot; data-hide=&quot;test-tab-state !== 2&quot;&gt;
+Welcome to the about page
+&lt;/div&gt;
+
+&lt;div class=&quot;hiddenelem&quot; data-show=&quot;test-tab-state === 3&quot; data-hide=&quot;test-tab-state !== 3&quot;&gt;
+Welcome to the contact page
+&lt;/div&gt;
+
+JS:
+dataBinder.controller('test-tab-state',function(e,v){
+var _this = $(e);
+_this.addClass('active');
+_this.siblings('li').removeClass('active');
+});
+</pre>

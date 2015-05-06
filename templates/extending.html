@@ -1,0 +1,131 @@
+<h2>Basic Extending</h2>
+
+<h3>Tacking on</h3>
+<p>Binder allows you to add on logic to 3 different areas of its process using callbacks:</p>
+
+<ol>
+	<li><strong>init</strong> - before curly braces are parsed, and models are updated (unless you passed in a model beforehand).</li>
+	<li><strong>domUpdate</strong> - when ever a domUpdate even will fire (click, change, keyup) you can use this to input your own domUpdates to specific elements, or change models how you see fit (using binder.model(model, value)).</li>
+	<li><strong>finish</strong> - after the first curly braces are parsed and models are updated.</li>
+</ol>
+
+<div>
+	<button class="btn show-code" data-click="code4 = 1" data-hide="code4 !== 2" data-show="code4 === 2">Show Code</button>
+	<button class="btn hide-code hiddenelem" data-click="code4 = 2" data-show="code4 === 1" data-hide="code4 !== 1">Hide Code</button>
+</div>
+
+<pre data-show="code4 === 1" data-hide="code4 === 2" class="hiddenelem">
+JS:
+var binder = new Binder();
+
+binder.extend('init',function(r){
+console.log('init!');
+});
+
+binder.extend('finish',function(r){
+console.log('finished');
+});
+
+binder.extend('domUpdate',function(r){
+console.log('domUpdate fired');
+});
+</pre>
+
+<h2>Advanced Extending (directives)</h2>
+<p>With advanced extending we can effectively emulate angular style directives (data-attributes in html that have functions or other code attached).
+<p>You can call the &nbsp;<code>binder.extend()</code>&nbsp;  method with only one argument that is an object. The object should/can have the following keys:</p>
+
+<ul>
+	<li><strong>model</strong>(default: '') - Pass in a string of any model you want, you'll be able to get the current model value returned inside of the callback function.</li>
+	<li><strong>data</strong>(required) - The attribute that will be on the html element. You can pass whatever you want in as its value, that value will be returned in the callback as well.</li>
+	<li><strong>callback</strong>(required) - An anonymous function that will accept code and will run.</li>
+	<li><strong>eventType</strong>(default: 'click', opts: any event type) - you can choose how you want elements attached with your data-attr to fire their callbacks.</li>
+</ul>
+
+<p>The callback will return an argument that is an object for you to use that will contain 3 things. The element that was triggered, the data-attributes value (if there is one, and finally any model's value you passed in before.</p>
+
+<h3>todo list</h3>
+<ol id="todo-list">
+	<li> <span>Thing 1</span> <button data-toggleCheckTodoItem class="btn btn-success btn-xs">&check;</button> <button data-deleteTodoItem class="btn btn-danger btn-xs">X</button> </li>
+	<li> <span>Thing 2</span> <button data-toggleCheckTodoItem class="btn btn-success btn-xs">&check;</button> <button data-deleteTodoItem class="btn btn-danger btn-xs">X</button> </li>
+</ol>
+
+<input type="text" id="todoInput" data-model="todo-input"/>
+<button data-addTodoItem class="btn btn-success btn-xs" data-click="test = 1">Add</button>
+
+<div>
+	<button class="btn show-code" data-click="code5 = 1" data-hide="code5 !== 2" data-show="code5 === 2">Show Code</button>
+	<button class="btn hide-code hiddenelem" data-click="code5 = 2" data-show="code5 === 1" data-hide="code5 !== 1">Hide Code</button>
+</div>
+
+<pre data-show="code5 === 1" data-hide="code5 === 2" class="hiddenelem">
+HTML:
+
+&lt;ol id=&quot;todo-list&quot;&gt;
+&lt;li&gt; &lt;span&gt;Thing 1&lt;/span&gt; &lt;button data-toggleCheckTodoItem class=&quot;btn btn-success btn-xs&quot;&gt;&amp;check;&lt;/button&gt; &lt;button data-deleteTodoItem class=&quot;btn btn-danger btn-xs&quot;&gt;X&lt;/button&gt; &lt;/li&gt;
+&lt;li&gt; &lt;span&gt;Thing 2&lt;/span&gt; &lt;button data-toggleCheckTodoItem class=&quot;btn btn-success btn-xs&quot;&gt;&amp;check;&lt;/button&gt; &lt;button data-deleteTodoItem class=&quot;btn btn-danger btn-xs&quot;&gt;X&lt;/button&gt; &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;input type=&quot;text&quot; id=&quot;todoInput&quot; data-model=&quot;todo-input&quot;/&gt;
+&lt;button data-addTodoItem class=&quot;btn btn-success btn-xs&quot; data-click=&quot;test = 1&quot;&gt;Add&lt;/button&gt;
+
+JS:
+
+//delete button on todo list
+binder.extend({
+model: '', //not needed
+data: 'deleteTodoItem', //the data attribute to find the element
+callback: function(returnObj){ //on event fire this callback will happen
+var element = returnObj.element;
+
+$(element).parent('li').remove();
+
+},
+eventType: 'click'//what event we'll be using to fire our callback
+
+});
+
+//add button on todo list
+binder.extend({
+model: 'todo-input', //needed
+data: 'addTodoItem', //the data attribute to find the element
+callback: function(returnObj){ //on event fire this callback will happen
+
+var element = returnObj.element;
+var dataVal = returnObj.dataAttrVal;
+var modelVal = returnObj.model === undefined ? '' : returnObj.model.value;
+
+if(modelVal.length  &gt; 0){
+var html = '&lt;li&gt;&lt;span&gt;'+modelVal+'&lt;/span&gt; &lt;button data-toggleCheckTodoItem class=&quot;btn btn-success btn-xs&quot;&gt;&amp;check;&lt;/button&gt; &lt;button data-deleteTodoItem class=&quot;btn btn-danger btn-xs&quot;&gt;X&lt;/button&gt;&lt;/li&gt;';
+var todoList = $('#todo-list');
+var input = $('#todoInput');
+
+todoList.append(html); //append our new
+
+input.val('').focus(); //put focus back in the input
+binder.model('todo-input', ''); //reset the model to an empty value
+
+}
+
+},
+eventType: 'click'//what event we'll be using to fire our callback
+
+});
+
+//toggle strike through
+binder.extend({
+data: 'toggleCheckTodoItem', //the data attribute to find the element
+callback: function(returnObj){ //on event fire this callback will happen
+
+var element = returnObj.element;
+var dataVal = returnObj.dataAttrVal;
+var modelVal = returnObj.model === undefined ? '' : returnObj.model.value;
+
+$(element).siblings('span').first().css('text-decoration', 'line-through');
+$(element).remove();
+
+},
+eventType: 'click'
+
+});
+</pre>

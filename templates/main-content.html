@@ -1,0 +1,61 @@
+<div class="row">
+
+	<div class="jumbotron" data-template="templates/jumbotron.html"></div>
+
+	<div class="col-md-12" data-show="navbar-status === 1" data-hide="navbar-status !== 1">
+
+		<h1> <a href="https://github.com/katerman/binder">Binder.js</a> </h1>
+
+
+		<p>A lightweight 2 way binder based on Angular.js created by Kevin Reynolds </p>
+
+	</div>
+
+
+	<div class="col-md-12 hiddenelem" data-show="navbar-status === 2" data-hide="navbar-status !== 2">
+
+		<h1> Docs </h1>
+
+		<div class="col-md-4">
+
+			<ul id="doc-nav">
+				<li><a href="#setup">Setup</a></li>
+				<li><a href="#basics">Basics</a></li>
+				<li><a href="#element-binding">Element Binding</a></li>
+				<li><a href="#controllers">Controllers</a></li>
+				<li><a href="#extending">Extending</a></li>
+				<li><a href="#templating">Templating</a></li>
+				<li><a href="#debugging-moreinfo">Debugging/moreinfo</a></li>
+			</ul>
+
+
+		</div>
+
+		<div class="col-md-8">
+
+			<div id="setup" class="row">
+
+				<h2>Setup</h2>
+				<p>To setup and use Binder just include it as a script at the end of the body and include the following javascript &nbsp;<code>var dataBinder = new Binder();</code>&nbsp; and &nbsp;<code>dataBinder.init();</code>. All method calls to Binder should happen before &nbsp;<code>init()</code>&nbsp; is called.</p>
+
+			</div>
+
+			<div id="basics" class="row" data-template="templates/basicsInBinding.html"></div>
+
+			<div id="element-binding" class="row code-row" data-template="templates/inputBinding.html"></div>
+
+			<div id="controllers" class="row code-row" data-tempalte="templates/controllers.html"></div>
+
+			<div class="row code-row" data-template="templates/controllers2.html"></div>
+
+			<div id="extending" class="row code-row" data-template="templates/extending.html"></div>
+
+			<div id="templating" class="row code-row" data-template="templates/templating.html"></div>
+
+			<div id="debugging-moreinfo" class="row code-row" data-template="templates/more-info.html"></div>
+
+		</div>
+
+
+	</div>
+</div>

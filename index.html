@@ -14,7 +14,7 @@
 
 	<style>
 		body{
-			font-family: 'Lato' !important;
+			font-family: 'Lato';
 		}
 		#attr-list li {
 			margin: 10px 0;
@@ -36,379 +36,24 @@
 </head>
 
 <body>
+
     <div class="container">
 
+		<nav data-template="templates/navbar.html" class="navbar navbar-default"></nav>
 
-        <nav class="navbar navbar-default">
-            <div class="container-fluid">
-                <!-- Brand and toggle get grouped for better mobile display -->
-
-                <div class="navbar-header">
-
-					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
-						<span class="sr-only">Toggle navigation</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-
-					<a  data-click="navbar-status = 1" class="navbar-brand" href="#home">Binder.js</a>
-                </div><!-- Collect the nav links, forms, and other content for toggling -->
-
-                <div class="collapse navbar-collapse" id="navbar-collapse">
-                    <ul class="nav navbar-nav">
-                        <li class="active"  data-click="navbar-status = 1"><a href="#home">Home</a></li>
-
-                        <li  data-click="navbar-status = 2"><a href="#docs">Docs</a></li>
-                    </ul>
-
-                </div><!-- /.navbar-collapse -->
-            </div><!-- /.container-fluid -->
-        </nav>
-
-
-
-		<div class="col-md-12 main-content">
-			<div class="row">
-
-				<div class="jumbotron">
-					<h1>Binder.js</h1>
-					<p>
-						<a class="btn btn-success btn-lg" href="https://github.com/katerman/binder/tree/master/js">Download</a>
-						<a data-model="clickOnDocs" data-click="clickOnDocs = 1" class="btn btn-info btn-lg" href="#docs">Docs</a>
-					</p>
-				</div>
-
-				<div class="col-md-12" data-show="navbar-status === 1" data-hide="navbar-status !== 1">
-
-					<h1> <a href="https://github.com/katerman/binder">Binder.js</a> </h1>
-
-
-					<p>A lightweight 2 way binder based on Angular.js created by Kevin Reynolds </p>
-
-				</div>
-
-
-				<div class="col-md-12 hiddenelem" data-show="navbar-status === 2" data-hide="navbar-status !== 2">
-
-					<h1> Docs </h1>
-
-					<div class="col-md-12">
-
-						<div class="row">
-
-							<h2>Setup</h2>
-							<p>To setup and use Binder just include it as a script at the end of the body and include the following javascript &nbsp;<code>var dataBinder = new Binder();</code>&nbsp; and &nbsp;<code>dataBinder.init();</code>. All method calls to Binder should happen before &nbsp;<code>init()</code>&nbsp; is called.</p>
-
-						</div>
-
-						<div class="row">
-							<h2>Basic data binding</h2>
-							<p>using the &nbsp;<code>data-model=""</code>&nbsp; attribute on an html element will allow that html element to update the model referenced in the attribute.</p>
-							<p>Binder will parse all of the &nbsp;<code>data-model=""</code>&nbsp; attributes on the page while initiating. However it wont do any filtering such as hiding or showing elements based on model defaults. So you will have to set html hidden/shown yourself. </p>
-
-							<h2>Attributes</h3>
-							<h3>Defaults</h3>
-							<p>Binders default data-attributes can be overwritten incase of naming issues.</p>
-
-							<ul id="attr-list">
-								<li><strong>model (data-model)</strong> - binder.modelDataAttr(newName) - used for associating an element to a model &nbsp;<code>data-model="modelName"</code>&nbsp;</li>
-								<li><strong>click (data-click)</strong> - binder.clickDataAttr(newName) - allows for a element on click to update a model &nbsp;<code>data-click="modelName = 1"</code>&nbsp; </li>
-								<li><strong>class (data-class)</strong> - binder.classDataAttr(newName) - Keeps an elements call update to date with a model (can use more than one add a space in between each model) &nbsp;<code>data-class="modelName1 modelName2"</code>&nbsp; </li>
-								<li><strong>hide (data-hide)</strong> - binder.hideDataAttr(newName) - If the basic expression is true it will hide the element on a domUpdate &nbsp;<code>data-hide="modelName !== 1"</code>&nbsp; </li>
-								<li><strong>show (data-show)</strong> - binder.showDataAttr(newName) - If the basic expression is true it will show the element on a domUpdate &nbsp;<code>data-hide="modelName === 1"</code>&nbsp; </li>
-								<li><strong>value (data-value)</strong> - binder.valueDataAttr(newName) - keeps the associated elements value the same as the model &nbsp;<code>data-value="modelName"</code>&nbsp; </li>
-							</ul>
-
-						</div>
-
-						<div class="row code-row">
-							<h3>Input to element binding</h3>
-							<p>With Binder's 2 way data binding changing the input below will also change text of the sentence.</p>
-							<p>Specifically to update the text the input is bound with &nbsp;<code>data-model="update-test"</code>&nbsp; which updates the model defined in the double curly brackets.</p>
-
-							<p>I LOVE: <span class="test-span">{{update-test}}</span> </p>
-							<input data-model="update-test" type="text" value="" placeholder="Update me!">
-
-							<div>
-								<button class="btn show-code" data-click="code1 = 1" data-hide="code1 === 1" data-show="code1 === 2">Show Code</button>
-								<button class="btn hide-code hiddenelem" data-click="code1 = 2" data-show="code1 === 1" data-hide="code1 !== 1">Hide Code</button>
-							</div>
-
-							<pre data-show="code1 === 1" data-hide="code1 === 2" class="hiddenelem">
-&lt;p&gt;I LOVE: &lt;span class=&quot;test-span&quot;&gt; /{/{update-test/}/} &lt;/span&gt; &lt;/p&gt;
-&lt;input data-model=&quot;update-test&quot; type=&quot;text&quot; value=&quot;&quot; placeholder=&quot;Update me!&quot;&gt;
-							</pre>
-						</div>
-
-						<div class="row code-row">
-							<h2>Controllers</h2>
-
-							<h3>Controller magic</h3>
-							<p>Using Binder's controllers you can add custom callbacks on any model updates.</p>
-							<p>Below is the same code as our original input to element binding, however with a slight twist, go ahead and give it a go.</p>
-
-							<p>I LOVE: <span data-model="update-test2" class="test-span">{{update-test2}}</span> </p>
-							<input data-model="update-test2" type="text" value="" placeholder="Update me!">
-
-							<p class="hidden-text"></p>
-
-							<div>
-								<button class="btn show-code" data-click="code2 = 1" data-hide="code2 === 1" data-show="code2 === 2">Show Code</button>
-								<button class="btn hide-code hiddenelem" data-click="code2 = 2" data-show="code2 === 1" data-hide="code2 !== 1">Hide Code</button>
-							</div>
-
-							<pre data-show="code2 === 1" data-hide="code2 === 2" class="hiddenelem">
-HTML:
-&lt;p&gt;I LOVE: &lt;span data-model="update-test2" class="test-span"&gt; /{/{update-test2/}/} &lt;/span&gt; &lt;/p&gt;
-&lt;input data-model="update-test2" type="text" value="" placeholder="Update me!"&gt;
-
-JS:
-dataBinder.controller('update-test', function(e,v){// dom element, and dataModel value
-	$(e).css('border', '5px solid #' + Math.random().toString(16).slice(2, 8) ); //add random border
-	$('.hidden-text').text('A defined controller populated me, and changed the inputs border!'); //add text to hidden p
-});
-							</pre>
-
-						</div>
-
-						<div class="row code-row">
-							<h3>Using a controller for more realistic actions</h3>
-							<p>With using of the 2 way data binding to update the tabs state. We can check on update to see which of our contents to display below.</p>
-							<p>The controller will add active to the element that triggered the model update, and add a class of active; while removing active from its siblings.</p>
-
-							<ul class="nav nav-tabs">
-								<li role="presentation" class="active" data-click="test-tab-state = 1"><a href="#doc">Home</a></li>
-								<li role="presentation" data-click="test-tab-state = 2"><a href="#docs">Profile</a></li>
-								<li role="presentation" data-click="test-tab-state = 3"><a href="#docs">Contact</a></li>
-							</ul>
-
-							<div data-show="test-tab-state === 1" data-hide="test-tab-state !== 1">
-								Welcome to the home page
-							</div>
-
-							<div class="hiddenelem" data-show="test-tab-state === 2" data-hide="test-tab-state !== 2">
-								Welcome to the about page
-							</div>
-
-							<div class="hiddenelem" data-show="test-tab-state === 3" data-hide="test-tab-state !== 3">
-								Welcome to the contact page
-							</div>
-
-							<div>
-								<button class="btn show-code" data-click="code3 = 1" data-hide="code3 === 1" data-show="code3 === 2">Show Code</button>
-								<button class="btn hide-code hiddenelem" data-click="code3 = 2" data-show="code3 === 1" data-hide="code3 !== 1">Hide Code</button>
-							</div>
-
-							<pre data-show="code3 === 1" data-hide="code3 === 2" class="hiddenelem">
-HTML:
-&lt;ul class=&quot;nav nav-tabs&quot;&gt;
-	&lt;li role=&quot;presentation&quot; class=&quot;active&quot; data-click=&quot;test-tab-state = 1&quot;&gt;&lt;a href=&quot;#doc&quot;&gt;Home&lt;/a&gt;&lt;/li&gt;
-	&lt;li role=&quot;presentation&quot; data-click=&quot;test-tab-state = 2&quot;&gt;&lt;a href=&quot;#docs&quot;&gt;Profile&lt;/a&gt;&lt;/li&gt;
-	&lt;li role=&quot;presentation&quot; data-click=&quot;test-tab-state = 3&quot;&gt;&lt;a href=&quot;#docs&quot;&gt;Contact&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;div data-show=&quot;test-tab-state === 1&quot; data-hide=&quot;test-tab-state !== 1&quot;&gt;
-	Welcome to the home page
-&lt;/div&gt;
-
-&lt;div class=&quot;hiddenelem&quot; data-show=&quot;test-tab-state === 2&quot; data-hide=&quot;test-tab-state !== 2&quot;&gt;
-	Welcome to the about page
-&lt;/div&gt;
-
-&lt;div class=&quot;hiddenelem&quot; data-show=&quot;test-tab-state === 3&quot; data-hide=&quot;test-tab-state !== 3&quot;&gt;
-	Welcome to the contact page
-&lt;/div&gt;
-
-JS:
-dataBinder.controller('test-tab-state',function(e,v){
-	var _this = $(e);
-	_this.addClass('active');
-	_this.siblings('li').removeClass('active');
-});
-							</pre>
-						</div>
-
-						<div class="row code-row">
-							<h2>Basic Extending</h2>
-
-							<h3>Tacking on</h3>
-							<p>Binder allows you to add on logic to 3 different areas of its process:</p>
-
-							<ol>
-								<li><strong>init</strong> - before curly braces are parsed, and models are updated (unless you passed in a model beforehand).</li>
-								<li><strong>domUpdate</strong> - when ever a domUpdate even will fire (click, change, keyup) you can use this to input your own domUpdates to specific elements, or change models how you see fit (using binder.model(model, value)).</li>
-								<li><strong>finish</strong> - after the first curly braces are parsed and models are updated.</li>
-							</ol>
-
-
-							<div>
-								<button class="btn show-code" data-click="code4 = 1" data-hide="code4 !== 2" data-show="code4 === 2">Show Code</button>
-								<button class="btn hide-code hiddenelem" data-click="code4 = 2" data-show="code4 === 1" data-hide="code4 !== 1">Hide Code</button>
-							</div>
-
-						<pre data-show="code4 === 1" data-hide="code4 === 2" class="hiddenelem">
-JS:
-var binder = new Binder();
-
-binder.extend('init',function(r){
-	console.log('init!');
-});
-
-binder.extend('finish',function(r){
-	console.log('finished');
-});
-
-binder.extend('domUpdate',function(r){
-	console.log('domUpdate fired');
-});
-							</pre>
-
-							<h2>Advanced Extending (directives)</h2>
-							<p>With advanced extending we can effectively emulate angular style directives (data-attributes in html that have functions or other code attached).
-							<p>You can call the &nbsp;<code>binder.extend()</code>&nbsp;  method with only one argument that is an object. The object should/can have the following keys:</p>
-
-							<ul>
-								<li><strong>model</strong>(default: '') - Pass in a string of any model you want, you'll be able to get the current model value returned inside of the callback function.</li>
-								<li><strong>data</strong>(required) - The attribute that will be on the html element. You can pass whatever you want in as its value, that value will be returned in the callback as well.</li>
-								<li><strong>callback</strong>(required) - An anonymous function that will accept code and will run.</li>
-								<li><strong>eventType</strong>(default: 'click', opts: any event type) - you can choose how you want elements attached with your data-attr to fire their callbacks.</li>
-							</ul>
-
-							<p>The callback will return an argument that is an object for you to use that will contain 3 things. The element that was triggered, the data-attributes value (if there is one, and finally any model's value you passed in before.</p>
-
-							<h3>todo list</h3>
-							<ol id="todo-list">
-								<li> <span>Thing 1</span> <button data-toggleCheckTodoItem class="btn btn-success btn-xs">&check;</button> <button data-deleteTodoItem class="btn btn-danger btn-xs">X</button> </li>
-								<li> <span>Thing 2</span> <button data-toggleCheckTodoItem class="btn btn-success btn-xs">&check;</button> <button data-deleteTodoItem class="btn btn-danger btn-xs">X</button> </li>
-							</ol>
-
-							<input type="text" id="todoInput" data-model="todo-input"/>
-							<button data-addTodoItem class="btn btn-success btn-xs" data-click="test = 1">Add</button>
-
-							<div>
-								<button class="btn show-code" data-click="code5 = 1" data-hide="code5 !== 2" data-show="code5 === 2">Show Code</button>
-								<button class="btn hide-code hiddenelem" data-click="code5 = 2" data-show="code5 === 1" data-hide="code5 !== 1">Hide Code</button>
-							</div>
-
-							<pre data-show="code5 === 1" data-hide="code5 === 2" class="hiddenelem">
-HTML:
-
-&lt;ol id=&quot;todo-list&quot;&gt;
-	&lt;li&gt; &lt;span&gt;Thing 1&lt;/span&gt; &lt;button data-toggleCheckTodoItem class=&quot;btn btn-success btn-xs&quot;&gt;&amp;check;&lt;/button&gt; &lt;button data-deleteTodoItem class=&quot;btn btn-danger btn-xs&quot;&gt;X&lt;/button&gt; &lt;/li&gt;
-	&lt;li&gt; &lt;span&gt;Thing 2&lt;/span&gt; &lt;button data-toggleCheckTodoItem class=&quot;btn btn-success btn-xs&quot;&gt;&amp;check;&lt;/button&gt; &lt;button data-deleteTodoItem class=&quot;btn btn-danger btn-xs&quot;&gt;X&lt;/button&gt; &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;input type=&quot;text&quot; id=&quot;todoInput&quot; data-model=&quot;todo-input&quot;/&gt;
-&lt;button data-addTodoItem class=&quot;btn btn-success btn-xs&quot; data-click=&quot;test = 1&quot;&gt;Add&lt;/button&gt;
-
-JS:
-
-//delete button on todo list
-binder.extend({
-	model: '', //not needed
-	data: 'deleteTodoItem', //the data attribute to find the element
-	callback: function(returnObj){ //on event fire this callback will happen
-		var element = returnObj.element;
-
-		$(element).parent('li').remove();
-
-	},
-	eventType: 'click'//what event we'll be using to fire our callback
-
-});
-
-//add button on todo list
-binder.extend({
-	model: 'todo-input', //needed
-	data: 'addTodoItem', //the data attribute to find the element
-	callback: function(returnObj){ //on event fire this callback will happen
-
-		var element = returnObj.element;
-		var dataVal = returnObj.dataAttrVal;
-		var modelVal = returnObj.model === undefined ? '' : returnObj.model.value;
-
-		if(modelVal.length  &gt; 0){
-			var html = '&lt;li&gt;&lt;span&gt;'+modelVal+'&lt;/span&gt; &lt;button data-toggleCheckTodoItem class=&quot;btn btn-success btn-xs&quot;&gt;&amp;check;&lt;/button&gt; &lt;button data-deleteTodoItem class=&quot;btn btn-danger btn-xs&quot;&gt;X&lt;/button&gt;&lt;/li&gt;';
-			var todoList = $('#todo-list');
-			var input = $('#todoInput');
-
-			todoList.append(html); //append our new
-
-			input.val('').focus(); //put focus back in the input
-			binder.model('todo-input', ''); //reset the model to an empty value
-
-		}
-
-	},
-	eventType: 'click'//what event we'll be using to fire our callback
-
-});
-
-//toggle strike through
-binder.extend({
-	data: 'toggleCheckTodoItem', //the data attribute to find the element
-	callback: function(returnObj){ //on event fire this callback will happen
-
-		var element = returnObj.element;
-		var dataVal = returnObj.dataAttrVal;
-		var modelVal = returnObj.model === undefined ? '' : returnObj.model.value;
-
-		$(element).siblings('span').first().css('text-decoration', 'line-through');
-		$(element).remove();
-
-	},
-	eventType: 'click'
-
-});
-
-
-							</pre>
-
-						</div>
-
-
-						<div class="row code-row">
-							<h2>Debugging and more information</h2>
-
-							<h3>Debugging</h3>
-							<p>Binder has some nice console logging of each action that you make turned on by default. If you were to open console and refresh this page you would see what happens every time a model updates.</p>
-							<p>You can turn off the console logging by turning it off with &nbsp;<code>dataBinder.properties.set('debug',bool);</code>&nbsp;</p>
-							<p>Using &nbsp;<code>console.log(dataBinder);</code>&nbsp; can help by dumping out all the data dataBinder stores. </p>
-
-							<h3>Updating/Overwriting properties</h3>
-							<p>In Binder you can update or overwrite the default values below is a list of the properties you can update.</p>
-							<ul>
-								<li>debug - if true this will console.log a lot of extra information for you</li>
-								<li>modelDataAttr - changes [data-model="modelName"]</li>
-								<li>clickDataAttr - changes [data-click="expression"]</li>
-								<li>classDataAttr - changes [data-class="classes"]</li>
-								<li>hideDataAttr - changes [data-hide="expression"]</li>
-								<li>showDataAttr - changes [data-show="expression"]</li>
-								<li>valueDataAttr - changes [data-value=""]</li>
-								<li>leftDelimiter - changes the left delimiter (default: {{)</li>
-								<li>rightDelimiter - changes the right delimiter (default: }})</li>
-							</ul>
-						</div>
-
-					</div>
-
-
-				</div>
-
-			</div>
-		</div>
+		<div class="col-md-12 main-content" data-template="templates/main-content.html"></div>
 
     </div>
 
     <script src="https://code.jquery.com/jquery-2.1.3.min.js" type="text/javascript"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<script src="js/site.js"></script>
 	<script type="text/javascript" src="js/databinder.js"></script>
     <script>
 
 		var binder = new Binder();
 
-		binder.properties.set('debug', true);
+		binder.properties.set('debug', false);
 
 		binder.model('update-test','chocolate');
 
@@ -419,17 +64,7 @@ binder.extend({
 		//Fire this after init finishes
 		binder.extend('finish',function(r){
 
-			//Navbar click on correct link if we have a hash
-			if(window.location.hash.length > 0){
-				var hash = window.location.hash;
-				var correct_elem = $('[href="'+hash+'"]').first();
-				correct_elem.parent().siblings('li').removeClass('active');
-				correct_elem.parent().addClass('active').end().click();
-
-			}else{
-				var link = $('#navbar-collapse > ul > li').first();
-				link.click();
-			}
+			$('.nav a').first().click();
 
 			//Need to display {{}} without them actually being replaced with a model, so we'll use /{/{ and /}/} and replace them with this
 			$.each($('pre'),function(k,v){
@@ -448,6 +83,19 @@ binder.extend({
 
 				//update the text
 				elem.text(newText);
+
+			});
+
+			//sticky doc sidebar nav
+			var docnav = $('#doc-nav');
+			console.log(docnav);
+			$(window).scroll(function(e){
+
+				if($(window).scrollTop() > 390 && $(window).width() > 976){
+					docnav.addClass('fixed');
+				}else{
+					docnav.removeClass('fixed');
+				}
 
 			});
 

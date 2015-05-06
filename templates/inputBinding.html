@@ -1,0 +1,16 @@
+<h3>Input to element binding</h3>
+<p>With Binder's 2 way data binding changing the input below will also change text of the sentence.</p>
+<p>Specifically to update the text the input is bound with &nbsp;<code>data-model="update-test"</code>&nbsp; which updates the model defined in the double curly brackets.</p>
+
+<p>I LOVE: <span class="test-span">{{update-test}}</span> </p>
+<input data-model="update-test" type="text" value="" placeholder="Update me!">
+
+<div>
+	<button class="btn show-code" data-click="code1 = 1" data-hide="code1 === 1" data-show="code1 === 2">Show Code</button>
+	<button class="btn hide-code hiddenelem" data-click="code1 = 2" data-show="code1 === 1" data-hide="code1 !== 1">Hide Code</button>
+</div>
+
+<pre data-show="code1 === 1" data-hide="code1 === 2" class="hiddenelem">
+&lt;p&gt;I LOVE: &lt;span class=&quot;test-span&quot;&gt; /{/{update-test/}/} &lt;/span&gt; &lt;/p&gt;
+&lt;input data-model=&quot;update-test&quot; type=&quot;text&quot; value=&quot;&quot; placeholder=&quot;Update me!&quot;&gt;
+</pre>

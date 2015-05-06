@@ -1,5 +1,5 @@
 /*
-* binder.js - 0.22 (HIPPOGRIFF)
+* binder.js - 0.23 (GOJIRA)
 * Created By Kevin Reynolds <https://github.com/katerman>
 */
 
@@ -33,7 +33,8 @@ var Binder = function(){
 		"showDataAttr": "show",
 		"valueDataAttr": "value",
 		"leftDelimiter": "{{",
-		"rightDelimiter": "}}"
+		"rightDelimiter": "}}",
+		"templateDataAttr": "template"
 	}
 
 	this.properties.set = function(prop, val){
@@ -624,37 +625,133 @@ var Binder = function(){
 
 	}
 
+	/* Templating */
+
+	// Id's related to each template we have
+	this.templates = [];
+
+	this.template = {
+
+		renderRemote: function(thisTempAttr, k, tempAttr){
+
+			$(k).removeAttr('data-'+tempAttr).removeData(tempAttr);
+
+			var ajaxCall = $.ajax({
+				method: "GET",
+				url: thisTempAttr,
+			});
+
+			ajaxCall.error(function(error){
+				console.error('Template "' + thisTempAttr + '" not found');
+				return true;
+			})
+
+			$.when( ajaxCall ).done(function(data, textStatus, jqXHR){
+
+				$(k).html(data);
+
+				if($this.properties.get('debug')){ console.log('%cReplaced', $(k), 'with remote template', thisTempAttr) ; }
+			});
+
+		},
+
+		/* template.gather()
+		* Collects all id's from each element with data-template and adds them to our this.templates array
+		*/
+		gather: function(){
+
+			var tempAttr = $this.properties.get('templateDataAttr');
+			var _this = this;
+
+			$.each( $('[data-'+tempAttr+']') , function(i,k){
+
+				var thisTempAttr = $(k).data(tempAttr);
+
+				//if it has a slash in it, we will just assume we need to retreive it
+				if( thisTempAttr.match('.html') ){
+					_this.renderRemote(thisTempAttr, k, tempAttr);
+				}else{
+					$this.templates.push( thisTempAttr );
+				}
+
+			});
+
+			$(document).ajaxStop(function(){
+				if($('[data-'+tempAttr+']').length !== 0){
+					return false;
+				}
+
+				return true;
+			});
+		},
+
+		/* template.render()
+		* replaces all type/binder-templates with their corresponding local template
+		*/
+		renderLocal: function(){
+
+			if($this.properties.get('debug')){ console.log('Rendering internal templates'); }
+
+			$.each($this.templates, function(i,k){
+				var currHtml = $('#'+k).html();
+				$('[data-'+$this.properties.get('templateDataAttr')+']').html(currHtml);
+			});
+		},
+		init: function(){
+
+			//if gather finished
+			if(this.gather() === true){
+				return true;
+			}
+
+			$(document).ajaxStop(function(){
+
+				return $this.template.init();
+
+			});
+
+		}
+
+	};
+
 	//Init
 	this.init = function(){
 
 		if($this.properties.get('debug')){ console.log('%c:BINDER INIT:', 'color: #1b75bc; border-bottom: 1px solid #6677ff;'); }
 		if($this.properties.get('debug')){ console.time(":Binder Setup Time:"); }
 
-		//defining custom init events
-		if( Object.size($this.basicExtendObj['init']) > 0){
-			$.each($this.basicExtendObj['init'], function(k,v){
-				v.call($this);
-			});
-		}
+		//templates
+		$this.template.init();
 
-		var prototype = $this.prototype;
+		$(document).ajaxStop(function(){
 
-		prototype.parseCurlys();
+			//defining custom init events
+			if( Object.size($this.basicExtendObj['init']) > 0){
+				$.each($this.basicExtendObj['init'], function(k,v){
+					v.call($this);
+				});
+			}
 
-		prototype.replaceDelimWithModel();
+			var prototype = $this.prototype;
 
-		prototype.domEvents();
+			prototype.parseCurlys();
 
-		if($this.properties.get('debug')){console.timeEnd(":Binder Setup Time:");}
+			prototype.replaceDelimWithModel();
 
-		if($this.properties.get('debug')){console.log(this);}
+			prototype.domEvents();
+
+			if($this.properties.get('debug')){console.timeEnd(":Binder Setup Time:");}
+
+			if($this.properties.get('debug')){console.log(this);}
 
 			//defining custom finish events
-		if( Object.size($this.basicExtendObj['finish']) > 0){
-			$.each($this.basicExtendObj['finish'], function(k,v){
-				v.call($this);
-			});
-		}
+			if( Object.size($this.basicExtendObj['finish']) > 0){
+				$.each($this.basicExtendObj['finish'], function(k,v){
+					v.call($this);
+				});
+			}
+
+		});
 
 	}
 

@@ -1,0 +1,18 @@
+<h2>Basic data binding</h2>
+<p>using the &nbsp;<code>data-model=""</code>&nbsp; attribute on an html element will allow that html element to update the model referenced in the attribute.</p>
+<p>Binder will parse all of the &nbsp;<code>data-model=""</code>&nbsp; attributes on the page while initiating. However it wont do any filtering such as hiding or showing elements based on model defaults. So you will have to set html hidden/shown yourself. </p>
+
+<h2>Attributes</h3>
+<h3>Defaults</h3>
+<p>Binders default data-attributes can be overwritten incase of naming issues.</p>
+
+<ul id="attr-list">
+	<li><strong>model (data-model)</strong> - used for associating an element to a model &nbsp;<code>data-model="modelName"</code>&nbsp;</li>
+	<li><strong>click (data-click)</strong> - allows for a element on click to update a model &nbsp;<code>data-click="modelName = 1"</code>&nbsp; </li>
+	<li><strong>class (data-class)</strong> - Keeps an elements call update to date with a model (can use more than one add a space in between each model) &nbsp;<code>data-class="modelName1 modelName2"</code>&nbsp; </li>
+	<li><strong>hide (data-hide)</strong> - If the basic expression is true it will hide the element on a domUpdate &nbsp;<code>data-hide="modelName !== 1"</code>&nbsp; </li>
+	<li><strong>show (data-show)</strong>- If the basic expression is true it will show the element on a domUpdate &nbsp;<code>data-hide="modelName === 1"</code>&nbsp; </li>
+	<li><strong>value (data-value)</strong> - keeps the associated elements value the same as the model &nbsp;<code>data-value="modelName"</code>&nbsp; </li>
+	<li><strong>template (data-template)</strong> - updates a dom element with corresponding template</li>
+</ul>
+

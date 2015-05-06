@@ -1,0 +1,20 @@
+<h2>Debugging and more information</h2>
+
+<h3>Debugging</h3>
+<p>Binder has some nice console logging of each action that you make turned on by default. If you were to open console and refresh this page you would see what happens every time a model updates.</p>
+<p>You can turn off the console logging by turning it off with &nbsp;<code>dataBinder.properties.set('debug',bool);</code>&nbsp;</p>
+<p>Using &nbsp;<code>console.log(dataBinder);</code>&nbsp; can help by dumping out all the data dataBinder stores. </p>
+
+<h3>Updating/Overwriting properties</h3>
+<p>In Binder you can update or overwrite the default values below is a list of the properties you can update.</p>
+<ul>
+	<li>debug - if true this will console.log a lot of extra information for you</li>
+	<li>modelDataAttr - changes [data-model="modelName"]</li>
+	<li>clickDataAttr - changes [data-click="expression"]</li>
+	<li>classDataAttr - changes [data-class="classes"]</li>
+	<li>hideDataAttr - changes [data-hide="expression"]</li>
+	<li>showDataAttr - changes [data-show="expression"]</li>
+	<li>valueDataAttr - changes [data-value=""]</li>
+	<li>leftDelimiter - changes the left delimiter (default: {{)</li>
+	<li>rightDelimiter - changes the right delimiter (default: }})</li>
+</ul>

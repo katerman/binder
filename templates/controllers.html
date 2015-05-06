@@ -1,0 +1,28 @@
+<h2>Controllers</h2>
+
+<h3>Controller magic</h3>
+<p>Using Binder's controllers you can add custom callbacks on any model updates.</p>
+<p>Below is the same code as our original input to element binding, however with a slight twist, go ahead and give it a go.</p>
+
+<p>I LOVE: <span data-model="update-test2" class="test-span">{{update-test2}}</span> </p>
+<input data-model="update-test2" type="text" value="" placeholder="Update me!">
+
+<p class="hidden-text"></p>
+
+<div>
+	<button class="btn show-code" data-click="code2 = 1" data-hide="code2 === 1" data-show="code2 === 2">Show Code</button>
+	<button class="btn hide-code hiddenelem" data-click="code2 = 2" data-show="code2 === 1" data-hide="code2 !== 1">Hide Code</button>
+</div>
+
+<pre data-show="code2 === 1" data-hide="code2 === 2" class="hiddenelem">
+HTML:
+&lt;p&gt;I LOVE: &lt;span data-model="update-test2" class="test-span"&gt; /{/{update-test2/}/} &lt;/span&gt; &lt;/p&gt;
+&lt;input data-model="update-test2" type="text" value="" placeholder="Update me!"&gt;
+
+JS:
+dataBinder.controller('update-test', function(e,v){// dom element, and dataModel value
+$(e).css('border', '5px solid #' + Math.random().toString(16).slice(2, 8) ); //add random border
+$('.hidden-text').text('A defined controller populated me, and changed the inputs border!'); //add text to hidden p
+});
+</pre>
+
