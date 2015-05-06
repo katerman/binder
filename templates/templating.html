@@ -1,6 +1,6 @@
 <h3>Templating</h3>
-<p>You can use templating with the data-template attribute. You will have to pass in the id of the script with the same id as your passed in data-template.
-<p>The script you use for your template tag must have an invalid type. Suggested to use <code>text/binder-template</code> however this is not crucial.
+<p>You can use templating with the data-template attribute. You will have to pass in the id of the script with the same id as your passed in data-template.</p>
+<p>The script you use for your template tag must have an invalid type. Suggested to use <code>text/binder-template</code> however this is not crucial.</p>
 
 <div>
 	<button class="btn show-code" data-click="templateBtn = 1" data-hide="templateBtn !== 2" data-show="templateBtn === 2">Show Code</button>
@@ -8,6 +8,7 @@
 </div>
 
 <pre data-show="templateBtn === 1" data-hide="templateBtn === 2" class="hiddenelem">
+Inline
 &lt;script type=&quot;text/binder-template&quot; id=&quot;testTemplate&quot;&gt;
 &lt;p&gt;Gets Replaced by&lt;/p&gt;
 &lt;/script&gt;
@@ -15,4 +16,7 @@
 &lt;div data-template=&quot;testTemplate&quot;&gt;
 Template Area
 &lt;/div&gt;
+
+External
+&lt;div&gt; class="jumbotron" data-template="templates/file.html">&lt;/div&gt;
 </pre>

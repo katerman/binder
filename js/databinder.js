@@ -632,25 +632,30 @@ var Binder = function(){
 
 	this.template = {
 
+		templateAjaxReqs: [],
+
 		renderRemote: function(thisTempAttr, k, tempAttr){
 
 			$(k).removeAttr('data-'+tempAttr).removeData(tempAttr);
 
 			var ajaxCall = $.ajax({
 				method: "GET",
-				url: thisTempAttr,
+				url: thisTempAttr
 			});
 
 			ajaxCall.error(function(error){
 				console.error('Template "' + thisTempAttr + '" not found');
 				return true;
-			})
+			});
+
+			$this.template.templateAjaxReqs.push(ajaxCall);
 
 			$.when( ajaxCall ).done(function(data, textStatus, jqXHR){
 
 				$(k).html(data);
 
 				if($this.properties.get('debug')){ console.log('%cReplaced', $(k), 'with remote template', thisTempAttr) ; }
+
 			});
 
 		},
@@ -676,13 +681,16 @@ var Binder = function(){
 
 			});
 
-			$(document).ajaxStop(function(){
+			$.when.apply($, $this.template.templateAjaxReqs).done(function() {
+
 				if($('[data-'+tempAttr+']').length !== 0){
 					return false;
 				}
 
 				return true;
+
 			});
+
 		},
 
 		/* template.render()
@@ -704,10 +712,12 @@ var Binder = function(){
 				return true;
 			}
 
-			$(document).ajaxStop(function(){
+			$.when.apply($, $this.template.templateAjaxReqs).done(function() {
 
-				return $this.template.init();
-
+				if($this.template.templateAjaxReqs.length > 0){
+					$this.template.templateAjaxReqs = [];
+					return $this.template.init();
+				}
 			});
 
 		}
